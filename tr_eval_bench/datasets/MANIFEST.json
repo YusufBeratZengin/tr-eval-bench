@@ -1,0 +1,17 @@
+{
+  "name": "tr-eval-mini-0.1.0",
+  "license": "MIT",
+  "language": "tr",
+  "created": "2026-11-03",
+  "source": "Original text authored for tr-eval-bench from widely known general knowledge. No external corpus was copied; see PROVENANCE.md.",
+  "counts": {
+    "sts_pairs": 100,
+    "retrieval_queries": 100,
+    "corpus_passages": 100
+  },
+  "files": {
+    "sts_mini.parquet": "9af8d06aee16cb6a73e378538eb310d7aaed2cfa4694ee032186adfa9f62f7ca",
+    "rag_corpus.parquet": "84f6d8069e3124681b5e442b8e95f0b3c5cddd80e2c1cfacedd753a8ab237a91",
+    "rag_mini.parquet": "47bdf449f4ae0bd0e590d62866a7c604ea88ebd25aeca4d1102b395d5a7ad5e8"
+  }
+}

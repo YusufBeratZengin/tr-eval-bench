@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/YusufBeratZengin/tr-eval-bench#readme
+    about: Install steps, CLI reference, limitations and the library API.
+  - name: Security report
+    url: https://github.com/YusufBeratZengin/tr-eval-bench/security/advisories/new
+    about: Report vulnerabilities privately, never in a public issue.
+  - name: Questions and ideas
+    url: https://github.com/YusufBeratZengin/tr-eval-bench/discussions
+    about: Ask about model choice, datasets or how to read the scores.

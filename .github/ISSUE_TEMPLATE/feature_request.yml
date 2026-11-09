@@ -1,0 +1,45 @@
+name: Feature request
+description: Suggest a task, backend, metric or CLI improvement
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the situation where the current tool is not enough.
+      placeholder: "I want to compare two reranker models on Turkish data because ..."
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behaviour
+      description: CLI flag, API signature or task name, plus the metric definition if relevant.
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Area
+      options:
+        - New evaluation task (STS / retrieval / classification / clustering / reranking)
+        - New embedding backend
+        - Reporting (Markdown, JSON, leaderboard export)
+        - Dataset (harder negatives, new domains)
+        - Developer experience / packaging / CI
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Existing tools, workarounds, or why MTEB/TR-MTEB do not cover this.
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Project constraints
+      options:
+        - label: The proposal keeps the default install offline and CPU-runnable.
+          required: true
+        - label: Any new data can be released under MIT (original or clearly licensed, no personal data).
+          required: true

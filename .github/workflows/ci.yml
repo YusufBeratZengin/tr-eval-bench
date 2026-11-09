@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: ${{ matrix.os }} / Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.10", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+
+      - name: Install package with dev extras
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Quality gate (lint, format, types, tests, coverage)
+        shell: bash
+        env:
+          PYTHON: python
+        run: bash scripts/check.sh
+
+      - name: Windows redirected stdout (cp1252) markdown smoke test
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          export PYTHONIOENCODING=cp1252
+          tr-eval-bench diff hashing:64 hashing:128 --tasks retrieval --limit 5 --format markdown > "$RUNNER_TEMP/diff-cp1252.md"
+          python - "$RUNNER_TEMP/diff-cp1252.md" <<'PY'
+          import pathlib
+          import sys
+
+          text = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8")
+          assert "| Metric | Baseline | Candidate | Δ | Winner |" in text, text[:200]
+          print(f"redirected cp1252 stdout wrote {len(text)} chars of UTF-8 markdown")
+          PY
+
+  package:
+    name: Build and inspect distributions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Build sdist and wheel
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build
+
+      - name: Verify bundled datasets are inside the wheel
+        run: |
+          python - <<'PY'
+          import glob, sys, zipfile
+          wheels = glob.glob("dist/*.whl")
+          assert wheels, "no wheel built"
+          names = zipfile.ZipFile(wheels[0]).namelist()
+          required = [
+              "tr_eval_bench/datasets/sts_mini.parquet",
+              "tr_eval_bench/datasets/rag_mini.parquet",
+              "tr_eval_bench/datasets/rag_corpus.parquet",
+              "tr_eval_bench/datasets/MANIFEST.json",
+          ]
+          missing = [name for name in required if name not in names]
+          if missing:
+              sys.exit(f"wheel is missing bundled datasets: {missing}")
+          print(f"{wheels[0]} contains {len(names)} files, datasets included")
+          PY
+
+      - name: Install the wheel and run the offline smoke test
+        run: |
+          python -m pip install dist/*.whl
+          cd "$RUNNER_TEMP"
+          tr-eval-bench hashing:64 --tasks retrieval --limit 5
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: distributions
+          path: dist/
+          if-no-files-found: error
