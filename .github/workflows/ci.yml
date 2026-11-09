@@ -97,7 +97,7 @@ jobs:
           cd "$RUNNER_TEMP"
           tr-eval-bench hashing:64 --tasks retrieval --limit 5
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: distributions
           path: dist/
